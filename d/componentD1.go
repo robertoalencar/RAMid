@@ -1,11 +1,9 @@
-package d
+package main
 
 import (
-	"RAMid/servidor"
+	servidor "RAMid/server"
 	"fmt"
 )
-
-type D1 struct{}
 
 func Transmitir(n int) {
 
@@ -15,7 +13,7 @@ func Transmitir(n int) {
 	ch <- n
 }
 
-func (D1) Executar(ch chan int) {
+func Executar(ch chan int) {
 
 	n := <-ch
 
