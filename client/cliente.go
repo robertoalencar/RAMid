@@ -1,6 +1,7 @@
 package main
 
 import (
+	"RAMid/components"
 	"RAMid/util"
 	"fmt"
 	"plugin"
@@ -11,7 +12,8 @@ func Transmitir(n int) {
 	ch := make(chan int)
 
 	//Carrega o arquivo do componente
-	componente, err := plugin.Open(util.REPOSITORIO_COMPONENTES + "componentA1.so")
+	versaoComponente := components.Manager{}.ObterVersaoComponente("componentA")
+	componente, err := plugin.Open(util.URL_REPOSITORIO_COMPONENTES + versaoComponente)
 	util.ChecaErro(err, "Falha ao carregar o arquivo do componente")
 
 	//Indica qual a função que será executada de do componente

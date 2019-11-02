@@ -1,6 +1,8 @@
 package main
 
 import (
+	"RAMid/components"
+	"RAMid/util"
 	"fmt"
 	"plugin"
 )
@@ -9,18 +11,12 @@ func Transmitir(n int) {
 
 	ch := make(chan int)
 
-	componente, err := plugin.Open("/home/robertoalencar/go/src/RAMid/components/componentD1.so")
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	versaoComponente := components.Manager{}.ObterVersaoComponente("componentD")
+	componente, err := plugin.Open(util.URL_REPOSITORIO_COMPONENTES + versaoComponente)
+	util.ChecaErro(err, "Falha ao carregar o arquivo do componente")
 
 	funcao, err := componente.Lookup("Executar")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	util.ChecaErro(err, "Falha ao carregar a função do componente")
 
 	Executar := funcao.(func(chan int))
 	go Executar(ch)
