@@ -1,14 +1,9 @@
 package servidor
 
-import (
-	"fmt"
-)
-
 type Servidor struct{}
 
-func (Servidor) Executar(ch chan int) {
+func (Servidor) Executar(ch chan string) {
 
 	n := <-ch
-
-	fmt.Println("Dado recebido pelo servidor:", n)
+	ch <- "A" + n
 }
