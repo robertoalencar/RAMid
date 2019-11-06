@@ -4,7 +4,6 @@ import (
 	"RAMid/components"
 	"RAMid/util"
 	"fmt"
-	"os"
 	"plugin"
 	"strconv"
 	"time"
@@ -39,23 +38,23 @@ func Executar(n int) string {
 
 func main() {
 
-	nomeArquivo := time.Now().Format("2006-01-02 15:04:05") + " - Avaliação de Desempenho.txt"
-	arquivo, _ := os.OpenFile(nomeArquivo, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
+	//nomeArquivo := time.Now().Format("2006-01-02 15:04:05") + " - Avaliação de Desempenho.txt"
+	//arquivo, _ := os.OpenFile(nomeArquivo, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
 
 	for i := 0; i < 10; i++ {
 
-		t1 := time.Now()
+		//t1 := time.Now()
 
 		fmt.Println("Envio: ", i)
 		valRetorno := Executar(i)
 		fmt.Println("Retorno: ", valRetorno)
 
-		t2 := time.Now()
-		x := t2.Sub(t1)
-		arquivo.WriteString(strconv.FormatInt(x.Microseconds(), 10) + "\n")
+		//t2 := time.Now()
+		//x := t2.Sub(t1)
+		//arquivo.WriteString(strconv.FormatInt(x.Microseconds(), 10) + "\n")
 
 		time.Sleep(10 * time.Second)
 	}
 
-	arquivo.Close()
+	//arquivo.Close()
 }

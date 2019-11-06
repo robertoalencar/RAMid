@@ -1,6 +1,6 @@
 {
-    "componentA" : "componentA1.so",
-    "componentB" : "componentB1.so",
-    "componentC" : "componentC1.so",
-    "componentD" : "componentD1.so"
+    "componentA" : "componentA/v1/componentA.so",
+    "componentB" : "componentB/v1/componentB.so",
+    "componentC" : "componentC/v1/componentC.so",
+    "componentD" : "componentD/v1/componentD.so"
 }
