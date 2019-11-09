@@ -3,5 +3,6 @@
     "componentB" : "v1",
     "componentC" : "v1",
     "componentD" : "v1",
-    "requestor" : "v1"
+    "requestor" : "v1",
+    "crh" : "v1"
 }

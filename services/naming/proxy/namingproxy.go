@@ -17,7 +17,7 @@ func (NamingProxy) Register(p1 string, proxy interface{}) bool {
 	params := make([]interface{}, 2)
 	params[0] = p1
 	params[1] = proxy
-	namingproxy := clientproxy.ClientProxy{Host: "", Port: util.NAMING_PORT, Id: 0}
+	namingproxy := clientproxy.ClientProxy{Host: util.NAMING_HOST, Port: util.NAMING_PORT, Id: 0}
 	request := aux.Request{Op: "Register", Params: params}
 	inv := aux.Invocation{Host: namingproxy.Host, Port: namingproxy.Port, Request: request}
 
@@ -46,7 +46,7 @@ func (NamingProxy) Lookup(p1 string) interface{} {
 	// prepare invocation
 	params := make([]interface{}, 1)
 	params[0] = p1
-	namingproxy := clientproxy.ClientProxy{Host: "", Port: util.NAMING_PORT, Id: 0}
+	namingproxy := clientproxy.ClientProxy{Host: util.NAMING_HOST, Port: util.NAMING_PORT, Id: 0}
 	request := aux.Request{Op: "Lookup", Params: params}
 	inv := aux.Invocation{Host: namingproxy.Host, Port: namingproxy.Port, Request: request}
 

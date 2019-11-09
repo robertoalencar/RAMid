@@ -4,8 +4,9 @@ import (
 	"RAMid/aux"
 	"RAMid/distribution/marshaller"
 	"RAMid/distribution/miop"
-	"RAMid/infrastructure/crh"
+	"RAMid/plugins"
 	"RAMid/util"
+	"plugin"
 )
 
 func Transmitir(ch chan interface{}) {
@@ -19,7 +20,7 @@ func Transmitir(ch chan interface{}) {
 func Invoke(inv aux.Invocation) interface{} {
 
 	marshallerInst := marshaller.Marshaller{}
-	crhInst := crh.CRH{ServerHost: inv.Host, ServerPort: inv.Port}
+	//crhInst := crh.CRH{ServerHost: inv.Host, ServerPort: inv.Port}
 
 	// create request packet
 	reqHeader := miop.RequestHeader{Context: "Context", RequestId: 1000, ResponseExpected: true, ObjectKey: 2000, Operation: inv.Request.Op}
@@ -31,8 +32,28 @@ func Invoke(inv aux.Invocation) interface{} {
 	// serialise request packet
 	msgToClientBytes := marshallerInst.Marshall(miopPacketRequest)
 
+	manager := plugins.Manager{}
+	componente, err := plugin.Open(manager.ObterComponente(util.ID_COMPONENTE_CRH))
+	util.ChecaErro(err, "Falha ao carregar o arquivo do componente")
+
+	funcao, err := componente.Lookup("Transmitir")
+	util.ChecaErro(err, "Falha ao carregar a função do componente")
+
+	Transmitir := funcao.(func(chan [3]interface{}))
+
+	ch := make(chan [3]interface{})
+	go Transmitir(ch)
+
+	var dados [3]interface{}
+	dados[0] = inv.Host
+	dados[1] = inv.Port
+	dados[2] = msgToClientBytes
+
 	// send request packet and receive reply packet
-	msgFromServerBytes := crhInst.SendReceive(msgToClientBytes)
+	ch <- dados
+	retorno := <-ch
+
+	msgFromServerBytes := retorno[2].([]byte)
 	miopPacketReply := marshallerInst.Unmarshall(msgFromServerBytes)
 
 	// extract result from reply packet

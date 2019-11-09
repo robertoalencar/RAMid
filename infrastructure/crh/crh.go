@@ -7,19 +7,29 @@ import (
 	"strconv"
 )
 
-type CRH struct {
-	ServerHost string
-	ServerPort int
+func Transmitir(ch chan [3]interface{}) {
+
+	dados := <-ch
+
+	serverHost := dados[0].(string)
+	serverPort := dados[1].(int)
+	msgToServer := dados[2].([]byte)
+
+	retorno := SendReceive(serverHost, serverPort, msgToServer)
+
+	dados[2] = retorno
+
+	ch <- dados
 }
 
-func (crh CRH) SendReceive(msgToServer []byte) []byte {
+func SendReceive(serverHost string, serverPort int, msgToServer []byte) []byte {
 
 	// connect to server
 	var conn net.Conn
 	var err error
 
 	for {
-		conn, err = net.Dial("tcp", "localhost:"+strconv.Itoa(crh.ServerPort))
+		conn, err = net.Dial("tcp", serverHost+":"+strconv.Itoa(serverPort))
 		if err == nil {
 			//log.Fatalf("CRH:: %s", err)
 			break
