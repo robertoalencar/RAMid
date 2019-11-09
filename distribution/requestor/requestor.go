@@ -8,9 +8,15 @@ import (
 	"RAMid/util"
 )
 
-type Requestor struct{}
+func Transmitir(ch chan interface{}) {
 
-func (Requestor) Invoke(inv aux.Invocation) interface{} {
+	dado := <-ch
+	inv := dado.(aux.Invocation)
+	retorno := Invoke(inv)
+	ch <- retorno
+}
+
+func Invoke(inv aux.Invocation) interface{} {
 
 	marshallerInst := marshaller.Marshaller{}
 	crhInst := crh.CRH{ServerHost: inv.Host, ServerPort: inv.Port}

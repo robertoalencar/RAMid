@@ -3,9 +3,10 @@ package proxy
 import (
 	"RAMid/aux"
 	"RAMid/distribution/clientproxy"
-	"RAMid/distribution/requestor"
+	"RAMid/plugins"
 	"RAMid/repository"
 	"RAMid/util"
+	"plugin"
 )
 
 type NamingProxy struct{}
@@ -20,9 +21,23 @@ func (NamingProxy) Register(p1 string, proxy interface{}) bool {
 	request := aux.Request{Op: "Register", Params: params}
 	inv := aux.Invocation{Host: namingproxy.Host, Port: namingproxy.Port, Request: request}
 
+	//Carrega o arquivo do componente
+	manager := plugins.Manager{}
+	componente, err := plugin.Open(manager.ObterComponente(util.ID_COMPONENTE_REQUESTOR))
+	util.ChecaErro(err, "Falha ao carregar o arquivo do componente")
+
+	funcao, err := componente.Lookup("Transmitir")
+	util.ChecaErro(err, "Falha ao carregar a função do componente")
+
+	Transmitir := funcao.(func(chan interface{}))
+
 	// invoke requestor
-	req := requestor.Requestor{}
-	ter := req.Invoke(inv).([]interface{})
+	ch := make(chan interface{})
+	go Transmitir(ch)
+	ch <- inv
+
+	retorno := <-ch
+	ter := retorno.([]interface{})
 
 	return ter[0].(bool)
 }
@@ -35,9 +50,23 @@ func (NamingProxy) Lookup(p1 string) interface{} {
 	request := aux.Request{Op: "Lookup", Params: params}
 	inv := aux.Invocation{Host: namingproxy.Host, Port: namingproxy.Port, Request: request}
 
+	//Carrega o arquivo do componente
+	manager := plugins.Manager{}
+	componente, err := plugin.Open(manager.ObterComponente(util.ID_COMPONENTE_REQUESTOR))
+	util.ChecaErro(err, "Falha ao carregar o arquivo do componente")
+
+	funcao, err := componente.Lookup("Transmitir")
+	util.ChecaErro(err, "Falha ao carregar a função do componente")
+
+	Transmitir := funcao.(func(chan interface{}))
+
 	// invoke requestor
-	req := requestor.Requestor{}
-	ter := req.Invoke(inv).([]interface{})
+	ch := make(chan interface{})
+	go Transmitir(ch)
+	ch <- inv
+
+	retorno := <-ch
+	ter := retorno.([]interface{})
 
 	// process reply
 	proxyTemp := ter[0].(map[string]interface{})
