@@ -6,19 +6,23 @@ import (
 	"log"
 )
 
-type Marshaller struct{}
+func Marshall(ch chan interface{}) {
 
-func (Marshaller) Marshall(msg miop.Packet) []byte {
+	param := <-ch
+	msg := param.(miop.Packet)
 
 	r, err := json.Marshal(msg)
 	if err != nil {
 		log.Fatalf("Marshaller:: Marshall:: %s", err)
 	}
 
-	return r
+	ch <- r
 }
 
-func (Marshaller) Unmarshall(msg []byte) miop.Packet {
+func Unmarshall(ch chan interface{}) {
+
+	param := <-ch
+	msg := param.([]byte)
 
 	r := miop.Packet{}
 	err := json.Unmarshal(msg, &r)
@@ -26,5 +30,5 @@ func (Marshaller) Unmarshall(msg []byte) miop.Packet {
 		log.Fatalf("Marshaller:: Unmarshall:: %s", err)
 	}
 
-	return r
+	ch <- r
 }

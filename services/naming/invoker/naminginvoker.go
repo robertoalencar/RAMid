@@ -2,11 +2,12 @@ package invoker
 
 import (
 	"RAMid/distribution/clientproxy"
-	"RAMid/distribution/marshaller"
 	"RAMid/distribution/miop"
 	"RAMid/infrastructure/srh"
+	"RAMid/plugins"
 	"RAMid/services/naming"
 	"RAMid/util"
+	"plugin"
 )
 
 type NamingInvoker struct{}
@@ -14,10 +15,19 @@ type NamingInvoker struct{}
 func (NamingInvoker) Invoke() {
 
 	srhImpl := srh.SRH{ServerHost: "localhost", ServerPort: util.NAMING_PORT}
-	marshallerImpl := marshaller.Marshaller{}
 	namingImpl := naming.NamingService{}
 	miopPacketReply := miop.Packet{}
 	replyParams := make([]interface{}, 1)
+
+	manager := plugins.Manager{}
+
+	marshallerInst, err := plugin.Open(manager.ObterComponente(util.ID_MARSHALLER))
+	util.ChecaErro(err, "Falha ao carregar o arquivo do componente")
+
+	funcUnmarshall, err := marshallerInst.Lookup("Unmarshall")
+	util.ChecaErro(err, "Falha ao carregar a função do componente")
+
+	Unmarshall := funcUnmarshall.(func(chan interface{}))
 
 	// control loop
 	for {
@@ -25,7 +35,12 @@ func (NamingInvoker) Invoke() {
 		rcvMsgBytes := srhImpl.Receive()
 
 		// unmarshall request packet
-		miopPacketRequest := marshallerImpl.Unmarshall(rcvMsgBytes)
+		chUnmarshall := make(chan interface{})
+		go Unmarshall(chUnmarshall)
+
+		chUnmarshall <- rcvMsgBytes
+		retornoUnmarshall := <-chUnmarshall
+		miopPacketRequest := retornoUnmarshall.(miop.Packet)
 
 		// extract operation name
 		operation := miopPacketRequest.Bd.ReqHeader.Operation
@@ -55,7 +70,18 @@ func (NamingInvoker) Invoke() {
 		miopPacketReply = miop.Packet{Hdr: header, Bd: body}
 
 		// marshall reply packet
-		msgToClientBytes := marshallerImpl.Marshall(miopPacketReply)
+		funcMarshall, err := marshallerInst.Lookup("Marshall")
+		util.ChecaErro(err, "Falha ao carregar a função do componente")
+
+		Marshall := funcMarshall.(func(chan interface{}))
+
+		chMarshaller := make(chan interface{})
+		go Marshall(chMarshaller)
+
+		// serialise request packet
+		chMarshaller <- miopPacketReply
+		retornoMarshall := <-chMarshaller
+		msgToClientBytes := retornoMarshall.([]byte)
 
 		// send reply packet
 		srhImpl.Send(msgToClientBytes)

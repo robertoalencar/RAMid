@@ -2,7 +2,6 @@ package main
 
 import (
 	"RAMid/aux"
-	"RAMid/distribution/marshaller"
 	"RAMid/distribution/miop"
 	"RAMid/plugins"
 	"RAMid/util"
@@ -14,8 +13,6 @@ func Invoke(chParam chan interface{}) {
 	param := <-chParam
 	inv := param.(aux.Invocation)
 
-	marshallerInst := marshaller.Marshaller{}
-
 	// create request packet
 	reqHeader := miop.RequestHeader{Context: "Context", RequestId: 1000, ResponseExpected: true, ObjectKey: 2000, Operation: inv.Request.Op}
 	reqBody := miop.RequestBody{Body: inv.Request.Params}
@@ -23,20 +20,34 @@ func Invoke(chParam chan interface{}) {
 	body := miop.Body{ReqHeader: reqHeader, ReqBody: reqBody}
 	miopPacketRequest := miop.Packet{Hdr: header, Bd: body}
 
-	// serialise request packet
-	msgToClientBytes := marshallerInst.Marshall(miopPacketRequest)
-
 	manager := plugins.Manager{}
-	componente, err := plugin.Open(manager.ObterComponente(util.ID_COMPONENTE_CRH))
+
+	marshallerInst, err := plugin.Open(manager.ObterComponente(util.ID_MARSHALLER))
 	util.ChecaErro(err, "Falha ao carregar o arquivo do componente")
 
-	funcao, err := componente.Lookup("SendReceive")
+	funcMarshall, err := marshallerInst.Lookup("Marshall")
 	util.ChecaErro(err, "Falha ao carregar a função do componente")
 
-	SendReceive := funcao.(func(chan [3]interface{}))
+	Marshall := funcMarshall.(func(chan interface{}))
 
-	ch := make(chan [3]interface{})
-	go SendReceive(ch)
+	chMarshaller := make(chan interface{})
+	go Marshall(chMarshaller)
+
+	// serialise request packet
+	chMarshaller <- miopPacketRequest
+	retornoMarshall := <-chMarshaller
+	msgToClientBytes := retornoMarshall.([]byte)
+
+	crhInst, err := plugin.Open(manager.ObterComponente(util.ID_COMPONENTE_CRH))
+	util.ChecaErro(err, "Falha ao carregar o arquivo do componente")
+
+	funcSendReceive, err := crhInst.Lookup("SendReceive")
+	util.ChecaErro(err, "Falha ao carregar a função do componente")
+
+	SendReceive := funcSendReceive.(func(chan [3]interface{}))
+
+	chRequestor := make(chan [3]interface{})
+	go SendReceive(chRequestor)
 
 	var parametros [3]interface{}
 	parametros[0] = inv.Host
@@ -44,11 +55,22 @@ func Invoke(chParam chan interface{}) {
 	parametros[2] = msgToClientBytes
 
 	// send request packet and receive reply packet
-	ch <- parametros
-	retorno := <-ch
+	chRequestor <- parametros
+	retornoSendReceive := <-chRequestor
 
-	msgFromServerBytes := retorno[2].([]byte)
-	miopPacketReply := marshallerInst.Unmarshall(msgFromServerBytes)
+	msgFromServerBytes := retornoSendReceive[2].([]byte)
+
+	funcUnmarshall, err := marshallerInst.Lookup("Unmarshall")
+	util.ChecaErro(err, "Falha ao carregar a função do componente")
+
+	Unmarshall := funcUnmarshall.(func(chan interface{}))
+
+	chUnmarshall := make(chan interface{})
+	go Unmarshall(chUnmarshall)
+
+	chUnmarshall <- msgFromServerBytes
+	retornoUnmarshall := <-chUnmarshall
+	miopPacketReply := retornoUnmarshall.(miop.Packet)
 
 	// extract result from reply packet
 	r := miopPacketReply.Bd.RepBody.OperationResult
