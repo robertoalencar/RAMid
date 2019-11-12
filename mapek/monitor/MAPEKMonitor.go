@@ -1,4 +1,4 @@
-package mapek
+package monitor
 
 type MAPEKMonitor struct{}
 

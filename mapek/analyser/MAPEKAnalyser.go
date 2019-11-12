@@ -1,4 +1,4 @@
-package mapek
+package analyser
 
 type MAPEKAnalyser struct{}
 

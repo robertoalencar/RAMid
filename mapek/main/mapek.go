@@ -1,15 +1,13 @@
 package main
 
 import (
-	"RAMid/mapek"
+	"RAMid/mapek/planner"
 	"fmt"
 )
 
 func main() {
 
-	mapekExecutor := mapek.MAPEKExecutor{IdPlugin: "requestor", NovaVersao: "v5"}
-
-	go mapekExecutor.Execute()
-
+	mapekPlanner := planner.MAPEKPlanner{IdPlugin: "requestor", NovaVersao: "v1"}
+	go mapekPlanner.Planner()
 	fmt.Scanln()
 }

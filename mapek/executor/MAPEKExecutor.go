@@ -1,9 +1,8 @@
-package mapek
+package executor
 
 import (
 	"RAMid/util"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 )
 
@@ -40,5 +39,5 @@ func (executor MAPEKExecutor) Execute() {
 	arquivoAtualizado, err := json.Marshal(managerMapNovo)
 	util.ChecaErro(err, "Falha ao converter o mapa no novo JSON")
 
-	fmt.Print(string(arquivoAtualizado))
+	ioutil.WriteFile(util.URL_MANAGER_COMPONENTES, arquivoAtualizado, 0644)
 }

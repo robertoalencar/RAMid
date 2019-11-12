@@ -1,6 +1,1 @@
-{
-    "requestor" : "v1",
-    "marshaller" : "v1",
-    "crh" : "v1",
-    "srh" : "v1"
-}
+{"crh":"v1","marshaller":"v1","requestor":"v1","srh":"v1"}
