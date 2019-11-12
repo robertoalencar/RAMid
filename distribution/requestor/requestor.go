@@ -20,7 +20,6 @@ func Transmitir(ch chan interface{}) {
 func Invoke(inv aux.Invocation) interface{} {
 
 	marshallerInst := marshaller.Marshaller{}
-	//crhInst := crh.CRH{ServerHost: inv.Host, ServerPort: inv.Port}
 
 	// create request packet
 	reqHeader := miop.RequestHeader{Context: "Context", RequestId: 1000, ResponseExpected: true, ObjectKey: 2000, Operation: inv.Request.Op}
@@ -36,21 +35,21 @@ func Invoke(inv aux.Invocation) interface{} {
 	componente, err := plugin.Open(manager.ObterComponente(util.ID_COMPONENTE_CRH))
 	util.ChecaErro(err, "Falha ao carregar o arquivo do componente")
 
-	funcao, err := componente.Lookup("Transmitir")
+	funcao, err := componente.Lookup("SendReceive")
 	util.ChecaErro(err, "Falha ao carregar a função do componente")
 
-	Transmitir := funcao.(func(chan [3]interface{}))
+	SendReceive := funcao.(func(chan [3]interface{}))
 
 	ch := make(chan [3]interface{})
-	go Transmitir(ch)
+	go SendReceive(ch)
 
-	var dados [3]interface{}
-	dados[0] = inv.Host
-	dados[1] = inv.Port
-	dados[2] = msgToClientBytes
+	var parametros [3]interface{}
+	parametros[0] = inv.Host
+	parametros[1] = inv.Port
+	parametros[2] = msgToClientBytes
 
 	// send request packet and receive reply packet
-	ch <- dados
+	ch <- parametros
 	retorno := <-ch
 
 	msgFromServerBytes := retorno[2].([]byte)

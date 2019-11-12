@@ -43,6 +43,7 @@ func (NamingProxy) Register(p1 string, proxy interface{}) bool {
 }
 
 func (NamingProxy) Lookup(p1 string) interface{} {
+
 	// prepare invocation
 	params := make([]interface{}, 1)
 	params[0] = p1

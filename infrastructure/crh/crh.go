@@ -7,22 +7,13 @@ import (
 	"strconv"
 )
 
-func Transmitir(ch chan [3]interface{}) {
+func SendReceive(ch chan [3]interface{}) {
 
-	dados := <-ch
+	parametros := <-ch
 
-	serverHost := dados[0].(string)
-	serverPort := dados[1].(int)
-	msgToServer := dados[2].([]byte)
-
-	retorno := SendReceive(serverHost, serverPort, msgToServer)
-
-	dados[2] = retorno
-
-	ch <- dados
-}
-
-func SendReceive(serverHost string, serverPort int, msgToServer []byte) []byte {
+	serverHost := parametros[0].(string)
+	serverPort := parametros[1].(int)
+	msgToServer := parametros[2].([]byte)
 
 	// connect to server
 	var conn net.Conn
@@ -68,5 +59,7 @@ func SendReceive(serverHost string, serverPort int, msgToServer []byte) []byte {
 		log.Fatalf("SRH:: %s", err)
 	}
 
-	return msgFromServer
+	parametros[2] = msgFromServer
+
+	ch <- parametros
 }
