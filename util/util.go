@@ -11,6 +11,7 @@ const NAMING_PORT = 1414
 
 const ID_COMPONENTE_REQUESTOR = "requestor"
 const ID_COMPONENTE_CRH = "crh"
+const ID_COMPONENTE_SRH = "srh"
 const ID_MARSHALLER = "marshaller"
 
 func ChecaErro(err error, msg string) {

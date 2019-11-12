@@ -7,19 +7,19 @@ import (
 	"strconv"
 )
 
-type SRH struct {
-	ServerHost string
-	ServerPort int
-}
-
 var ln net.Listener
 var conn net.Conn
 var err error
 
-func (srh SRH) Receive() []byte {
+func Receive(ch chan [3]interface{}) {
+
+	dados := <-ch
+
+	serverHost := dados[0].(string)
+	serverPort := dados[1].(int)
 
 	// create listener
-	ln, err = net.Listen("tcp", srh.ServerHost+":"+strconv.Itoa(srh.ServerPort))
+	ln, err = net.Listen("tcp", serverHost+":"+strconv.Itoa(serverPort))
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
@@ -45,10 +45,13 @@ func (srh SRH) Receive() []byte {
 		log.Fatalf("SRH:: %s", err)
 	}
 
-	return msg
+	dados[2] = msg
+	ch <- dados
 }
 
-func (SRH) Send(msgToClient []byte) {
+func Send(ch chan []byte) {
+
+	msgToClient := <-ch
 
 	// send message's size
 	size := make([]byte, 4)

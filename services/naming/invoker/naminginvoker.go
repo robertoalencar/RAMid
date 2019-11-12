@@ -3,7 +3,6 @@ package invoker
 import (
 	"RAMid/distribution/clientproxy"
 	"RAMid/distribution/miop"
-	"RAMid/infrastructure/srh"
 	"RAMid/plugins"
 	"RAMid/services/naming"
 	"RAMid/util"
@@ -14,12 +13,24 @@ type NamingInvoker struct{}
 
 func (NamingInvoker) Invoke() {
 
-	srhImpl := srh.SRH{ServerHost: "localhost", ServerPort: util.NAMING_PORT}
+	manager := plugins.Manager{}
+
+	srhInst, err := plugin.Open(manager.ObterComponente(util.ID_COMPONENTE_SRH))
+	util.ChecaErro(err, "Falha ao carregar o arquivo do componente")
+
+	funcReceive, err := srhInst.Lookup("Receive")
+	util.ChecaErro(err, "Falha ao carregar a função do componente")
+
+	Receive := funcReceive.(func(chan [3]interface{}))
+
+	funcSend, err := srhInst.Lookup("Send")
+	util.ChecaErro(err, "Falha ao carregar a função do componente")
+
+	Send := funcSend.(func(chan []byte))
+
 	namingImpl := naming.NamingService{}
 	miopPacketReply := miop.Packet{}
 	replyParams := make([]interface{}, 1)
-
-	manager := plugins.Manager{}
 
 	marshallerInst, err := plugin.Open(manager.ObterComponente(util.ID_MARSHALLER))
 	util.ChecaErro(err, "Falha ao carregar o arquivo do componente")
@@ -32,7 +43,18 @@ func (NamingInvoker) Invoke() {
 	// control loop
 	for {
 		// receive request packet
-		rcvMsgBytes := srhImpl.Receive()
+		chReceiveSrh := make(chan [3]interface{})
+		go Receive(chReceiveSrh)
+
+		var parametros [3]interface{}
+		parametros[0] = "localhost"
+		parametros[1] = util.NAMING_PORT
+
+		// send request packet and receive reply packet
+		chReceiveSrh <- parametros
+		retornoReceive := <-chReceiveSrh
+
+		rcvMsgBytes := retornoReceive[2].([]byte)
 
 		// unmarshall request packet
 		chUnmarshall := make(chan interface{})
@@ -84,6 +106,8 @@ func (NamingInvoker) Invoke() {
 		msgToClientBytes := retornoMarshall.([]byte)
 
 		// send reply packet
-		srhImpl.Send(msgToClientBytes)
+		chSendSrh := make(chan []byte)
+		go Send(chSendSrh)
+		chSendSrh <- msgToClientBytes
 	}
 }
