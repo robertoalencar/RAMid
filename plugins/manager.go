@@ -10,13 +10,10 @@ type Manager struct{}
 
 func (Manager) ObterComponente(idComponent string) string {
 
-	urlManagerComponentes := "/home/robertoalencar/go/src/RAMid/plugins/manager.json"
-	urlRepositoriComponentes := "/home/robertoalencar/go/src/RAMid/plugins/"
-
 	var versao string
 
 	//Carrega o arquivo do JSON
-	jsonComponentes, err := ioutil.ReadFile(urlManagerComponentes)
+	jsonComponentes, err := ioutil.ReadFile(util.URL_MANAGER_COMPONENTES)
 	util.ChecaErro(err, "Falha ao carregar o descritor doscomponentes")
 
 	//Cria o mapa que irá representar o JSON
@@ -31,5 +28,5 @@ func (Manager) ObterComponente(idComponent string) string {
 		}
 	}
 
-	return urlRepositoriComponentes + idComponent + "/" + versao + "/" + idComponent + ".so"
+	return util.URL_REPOSITORIO_COMPONENTES + idComponent + "/" + versao + "/" + idComponent + ".so"
 }

@@ -1,27 +1,7 @@
-package components
-
-import (
-	"gmidarch/shared/shared"
-	"gmidarch/shared/parameters"
-	"gmidarch/development/framework/messages"
-	"fmt"
-	"os"
-)
+package mapek
 
 type MAPEKAnalyser struct{}
 
-func (MAPEKAnalyser) I_Analyse(msg *messages.SAMessage, info interface{}, r *bool) {
+func (MAPEKAnalyser) Analyse() {
 
-	fmt.Printf("MAPEAnalyser:: I_Analyse \n")
-	os.Exit(0)
-	
-	// Information received from Monitor
-	listOfNewPlugins := msg.Payload.(shared.MonitoredEvolutiveData)
-
-	// TODO Analyse the remaining kind of monitored data
-	// Analyse the Evolutive monitored data
-	analysisResult := shared.AnalysisResult{}
-	analysisResult.Result = listOfNewPlugins
-	analysisResult.Analysis = parameters.EVOLUTIVE_CHANGE
-	*msg = messages.SAMessage{Payload: analysisResult}
 }

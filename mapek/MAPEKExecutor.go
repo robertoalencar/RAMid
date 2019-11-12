@@ -1,17 +1,44 @@
-package components
+package mapek
 
 import (
+	"RAMid/util"
+	"encoding/json"
 	"fmt"
-	"gmidarch/development/framework/messages"
+	"io/ioutil"
 )
 
-type MAPEKExecutor struct{}
+type MAPEKExecutor struct {
+	IdPlugin   string
+	NovaVersao string
+}
 
-func (MAPEKExecutor) I_Execute(msg *messages.SAMessage, info interface{}, r *bool) {
+func (executor MAPEKExecutor) Execute() {
 
-	// The Plan genetared by the 'Planner' is passed direct to the 'Execution Unit'
-	// TODO One element is changed per time in the new implementation
+	//Carrega o arquivo do JSON
+	jsonComponentes, err := ioutil.ReadFile(util.URL_MANAGER_COMPONENTES)
+	util.ChecaErro(err, "Falha ao carregar o descritor doscomponentes")
 
-	fmt.Println("Executor:: In Action")
-	fmt.Printf("Executor:: [%v] \n",msg)
+	//Cria o mapa que irá representar o JSON
+	managerMapAnterior := make(map[string]string)
+	managerMapNovo := make(map[string]string)
+
+	//Converte o JSON no mapa
+	json.Unmarshal([]byte(jsonComponentes), &managerMapAnterior)
+
+	for key, value := range managerMapAnterior {
+
+		versao := value
+
+		if key == executor.IdPlugin {
+			versao = executor.NovaVersao
+		}
+
+		managerMapNovo[key] = versao
+	}
+
+	//Converte o mapa atualizado no JSON
+	arquivoAtualizado, err := json.Marshal(managerMapNovo)
+	util.ChecaErro(err, "Falha ao converter o mapa no novo JSON")
+
+	fmt.Print(string(arquivoAtualizado))
 }
