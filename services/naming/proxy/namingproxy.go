@@ -26,14 +26,14 @@ func (NamingProxy) Register(p1 string, proxy interface{}) bool {
 	componente, err := plugin.Open(manager.ObterComponente(util.ID_COMPONENTE_REQUESTOR))
 	util.ChecaErro(err, "Falha ao carregar o arquivo do componente")
 
-	funcao, err := componente.Lookup("Transmitir")
+	funcao, err := componente.Lookup("Invoke")
 	util.ChecaErro(err, "Falha ao carregar a função do componente")
 
-	Transmitir := funcao.(func(chan interface{}))
+	Invoke := funcao.(func(chan interface{}))
 
 	// invoke requestor
 	ch := make(chan interface{})
-	go Transmitir(ch)
+	go Invoke(ch)
 	ch <- inv
 
 	retorno := <-ch
@@ -56,14 +56,14 @@ func (NamingProxy) Lookup(p1 string) interface{} {
 	componente, err := plugin.Open(manager.ObterComponente(util.ID_COMPONENTE_REQUESTOR))
 	util.ChecaErro(err, "Falha ao carregar o arquivo do componente")
 
-	funcao, err := componente.Lookup("Transmitir")
+	funcao, err := componente.Lookup("Invoke")
 	util.ChecaErro(err, "Falha ao carregar a função do componente")
 
-	Transmitir := funcao.(func(chan interface{}))
+	Invoke := funcao.(func(chan interface{}))
 
 	// invoke requestor
 	ch := make(chan interface{})
-	go Transmitir(ch)
+	go Invoke(ch)
 	ch <- inv
 
 	retorno := <-ch

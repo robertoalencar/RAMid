@@ -9,15 +9,10 @@ import (
 	"plugin"
 )
 
-func Transmitir(ch chan interface{}) {
+func Invoke(chParam chan interface{}) {
 
-	dado := <-ch
-	inv := dado.(aux.Invocation)
-	retorno := Invoke(inv)
-	ch <- retorno
-}
-
-func Invoke(inv aux.Invocation) interface{} {
+	param := <-chParam
+	inv := param.(aux.Invocation)
 
 	marshallerInst := marshaller.Marshaller{}
 
@@ -58,5 +53,5 @@ func Invoke(inv aux.Invocation) interface{} {
 	// extract result from reply packet
 	r := miopPacketReply.Bd.RepBody.OperationResult
 
-	return r
+	chParam <- r
 }
