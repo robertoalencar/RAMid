@@ -1,8 +1,8 @@
 package monitor
 
 import (
+	"RAMid/mapek/analyser"
 	"RAMid/util"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -32,15 +32,13 @@ func (MAPEKMonitor) Monitor(ehPrimeiraExecucao bool) {
 			filepath.Walk(util.URL_REPOSITORIO_COMPONENTES, contadorComponentes)
 		}
 
-		fmt.Println("qtdComponentesAntesAdaptacao: ", qtdComponentesAntesAdaptacao)
-		fmt.Println("qtdAtualComponentes: ", qtdAtualComponentes)
-
 		if qtdComponentesAntesAdaptacao != qtdAtualComponentes {
-			//chama o Analyser
-			fmt.Println("chama o Analyser")
+			mapekAnalyse := analyser.MAPEKAnalyser{}
+			go mapekAnalyse.Analyse()
+			qtdComponentesAntesAdaptacao = qtdAtualComponentes
 		}
 
-		time.Sleep(5 * time.Second)
+		time.Sleep(1 * time.Second)
 	}
 }
 

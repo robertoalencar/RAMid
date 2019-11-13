@@ -1,6 +1,8 @@
 package planner
 
-import "RAMid/mapek/executor"
+import (
+	"RAMid/mapek/executor"
+)
 
 type MAPEKPlanner struct {
 	IdPlugin   string

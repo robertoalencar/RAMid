@@ -22,7 +22,7 @@ func Invoke(chParam chan interface{}) {
 
 	manager := plugins.Manager{}
 
-	marshallerInst, err := plugin.Open(manager.ObterComponente(util.ID_MARSHALLER))
+	marshallerInst, err := plugin.Open(manager.ObterComponente(util.ID_COMPONENTE_MARSHALLER))
 	util.ChecaErro(err, "Falha ao carregar o arquivo do componente")
 
 	funcMarshall, err := marshallerInst.Lookup("Marshall")

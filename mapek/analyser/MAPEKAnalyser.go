@@ -1,80 +1,124 @@
 package analyser
 
 import (
+	"RAMid/mapek/planner"
+	"RAMid/plugins"
 	"RAMid/util"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
-	"time"
 )
 
 type MAPEKAnalyser struct{}
 
-var qtdArquivosRequestor int
-var qtdArquivosMarshaller int
-var qtdArquivosCrh int
-var qtdArquivosSrh int
+var versaoAtualRequestor int64
+var versaoAtualMarshaller int64
+var versaoAtualCrh int64
+var versaoAtualSrh int64
 
-func (MAPEKAnalyser) Analyse(ehPrimeiraExecucao bool) {
+func (MAPEKAnalyser) Analyse() {
 
-	for {
+	registraVersoesAtuaisComponentes()
 
-		if ehPrimeiraExecucao {
+	//Analisa adaptações do Requestor
+	filepath.Walk(util.URL_REPOSITORIO_COMPONENTES+"requestor", analisaVersoesRequestor)
 
-			registraQuantidadeComponentesRequestor()
-			ehPrimeiraExecucao = false
+	//Analisa adaptações do Marshaller
+	filepath.Walk(util.URL_REPOSITORIO_COMPONENTES+"marshaller", analisaVersoesMarshaller)
 
-		} else {
+	//Analisa adaptações do Crh
+	filepath.Walk(util.URL_REPOSITORIO_COMPONENTES+"crh", analisaVersoesCrh)
 
-			// monitoraVersoesRequestor()
-			// monitoraVersoesMarshaller()
-			// monitoraVersoesCrh()
-			// monitoraVersoesSrh()
+	//Analisa adaptações do Srh
+	filepath.Walk(util.URL_REPOSITORIO_COMPONENTES+"srh", analisaVersoesSrh)
+}
+
+func registraVersoesAtuaisComponentes() {
+
+	manager := plugins.Manager{}
+
+	versaoAtualRequestor = manager.ObterVersaoAtualComponente(util.ID_COMPONENTE_REQUESTOR)
+	versaoAtualMarshaller = manager.ObterVersaoAtualComponente(util.ID_COMPONENTE_MARSHALLER)
+	versaoAtualCrh = manager.ObterVersaoAtualComponente(util.ID_COMPONENTE_CRH)
+	versaoAtualSrh = manager.ObterVersaoAtualComponente(util.ID_COMPONENTE_SRH)
+}
+
+func analisaVersoesRequestor(path string, f os.FileInfo, err error) error {
+
+	arquivo := strings.ToLower(f.Name())
+
+	if strings.HasPrefix(arquivo, "v") {
+
+		versao := strings.TrimPrefix(arquivo, "v")
+		numVersao, err := strconv.ParseInt(versao, 10, 64)
+		util.ChecaErro(err, "Falha ao tentar obter o número da versão do diretório: "+f.Name())
+
+		if numVersao > versaoAtualRequestor {
+
+			mapekPlanner := planner.MAPEKPlanner{IdPlugin: "requestor", NovaVersao: arquivo}
+			go mapekPlanner.Planner()
 		}
-
-		time.Sleep(5 * time.Second)
-	}
-}
-
-func registraQuantidadeComponentesRequestor() {
-
-	filepath.Walk(util.URL_REPOSITORIO_COMPONENTES+"requestor", contadorComponentesRequestor)
-	filepath.Walk(util.URL_REPOSITORIO_COMPONENTES+"marshaller", contadorComponentesMarshaller)
-	filepath.Walk(util.URL_REPOSITORIO_COMPONENTES+"crh", contadorComponentesCrh)
-	filepath.Walk(util.URL_REPOSITORIO_COMPONENTES+"srh", contadorComponentesSrh)
-}
-
-func contadorComponentesRequestor(path string, arquivo os.FileInfo, err error) error {
-
-	if strings.HasSuffix(arquivo.Name(), ".so") {
-		qtdArquivosRequestor = qtdArquivosRequestor + 1
 	}
 
 	return nil
 }
 
-func contadorComponentesMarshaller(path string, arquivo os.FileInfo, err error) error {
+func analisaVersoesMarshaller(path string, f os.FileInfo, err error) error {
 
-	if strings.HasSuffix(arquivo.Name(), ".so") {
-		qtdArquivosMarshaller = qtdArquivosMarshaller + 1
+	arquivo := strings.ToLower(f.Name())
+
+	if strings.HasPrefix(arquivo, "v") {
+
+		versao := strings.TrimPrefix(arquivo, "v")
+		numVersao, err := strconv.ParseInt(versao, 10, 64)
+		util.ChecaErro(err, "Falha ao tentar obter o número da versão do diretório: "+f.Name())
+
+		if numVersao > versaoAtualMarshaller {
+
+			mapekPlanner := planner.MAPEKPlanner{IdPlugin: "marshaller", NovaVersao: arquivo}
+			go mapekPlanner.Planner()
+		}
 	}
 
 	return nil
 }
 
-func contadorComponentesCrh(path string, arquivo os.FileInfo, err error) error {
+func analisaVersoesCrh(path string, f os.FileInfo, err error) error {
 
-	if strings.HasSuffix(arquivo.Name(), ".so") {
-		qtdArquivosCrh = qtdArquivosCrh + 1
+	arquivo := strings.ToLower(f.Name())
+
+	if strings.HasPrefix(arquivo, "v") {
+
+		versao := strings.TrimPrefix(arquivo, "v")
+		numVersao, err := strconv.ParseInt(versao, 10, 64)
+		util.ChecaErro(err, "Falha ao tentar obter o número da versão do diretório: "+f.Name())
+
+		if numVersao > versaoAtualCrh {
+
+			mapekPlanner := planner.MAPEKPlanner{IdPlugin: "crh", NovaVersao: arquivo}
+			go mapekPlanner.Planner()
+		}
 	}
 
 	return nil
 }
 
-func contadorComponentesSrh(path string, arquivo os.FileInfo, err error) error {
+func analisaVersoesSrh(path string, f os.FileInfo, err error) error {
 
-	if strings.HasSuffix(arquivo.Name(), ".so") {
-		qtdArquivosSrh = qtdArquivosSrh + 1
+	arquivo := strings.ToLower(f.Name())
+
+	if strings.HasPrefix(arquivo, "v") {
+
+		versao := strings.TrimPrefix(arquivo, "v")
+		numVersao, err := strconv.ParseInt(versao, 10, 64)
+		util.ChecaErro(err, "Falha ao tentar obter o número da versão do diretório: "+f.Name())
+
+		if numVersao > versaoAtualSrh {
+
+			mapekPlanner := planner.MAPEKPlanner{IdPlugin: "srh", NovaVersao: arquivo}
+			go mapekPlanner.Planner()
+		}
 	}
 
 	return nil

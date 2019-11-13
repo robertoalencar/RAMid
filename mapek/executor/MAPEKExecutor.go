@@ -3,6 +3,7 @@ package executor
 import (
 	"RAMid/util"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 )
 
@@ -40,4 +41,6 @@ func (executor MAPEKExecutor) Execute() {
 	util.ChecaErro(err, "Falha ao converter o mapa no novo JSON")
 
 	ioutil.WriteFile(util.URL_MANAGER_COMPONENTES, arquivoAtualizado, 0644)
+
+	fmt.Println("Adaptação realizada com sucesso, componente", executor.IdPlugin, "atualizado para a versão", executor.NovaVersao)
 }
