@@ -32,7 +32,7 @@ func (NamingInvoker) Invoke() {
 	miopPacketReply := miop.Packet{}
 	replyParams := make([]interface{}, 1)
 
-	marshallerInst, err := plugin.Open(manager.ObterComponente(util.ID_MARSHALLER))
+	marshallerInst, err := plugin.Open(manager.ObterComponente(util.ID_COMPONENTE_MARSHALLER))
 	util.ChecaErro(err, "Falha ao carregar o arquivo do componente")
 
 	funcUnmarshall, err := marshallerInst.Lookup("Unmarshall")
