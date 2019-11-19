@@ -22,7 +22,6 @@ func SendReceive(ch chan [3]interface{}) {
 	for {
 		conn, err = net.Dial("tcp", serverHost+":"+strconv.Itoa(serverPort))
 		if err == nil {
-			//log.Fatalf("CRH:: %s", err)
 			break
 		}
 	}

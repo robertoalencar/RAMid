@@ -11,6 +11,8 @@ func Marshall(ch chan interface{}) {
 	param := <-ch
 	msg := param.(miop.Packet)
 
+	//testar a adaptação com GOB e com mensage pack
+
 	r, err := json.Marshal(msg)
 	if err != nil {
 		log.Fatalf("Marshaller:: Marshall:: %s", err)

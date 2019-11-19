@@ -47,7 +47,7 @@ func (NamingInvoker) Invoke() {
 		go Receive(chReceiveSrh)
 
 		var parametros [3]interface{}
-		parametros[0] = "localhost"
+		parametros[0] = util.NAMING_HOST
 		parametros[1] = util.NAMING_PORT
 
 		// send request packet and receive reply packet

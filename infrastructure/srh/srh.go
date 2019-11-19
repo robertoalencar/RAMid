@@ -19,7 +19,13 @@ func Receive(ch chan [3]interface{}) {
 	serverPort := dados[1].(int)
 
 	// create listener
-	ln, err = net.Listen("tcp", serverHost+":"+strconv.Itoa(serverPort))
+	for {
+		ln, err = net.Listen("tcp", serverHost+":"+strconv.Itoa(serverPort))
+		if err == nil {
+			break
+		}
+	}
+
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}

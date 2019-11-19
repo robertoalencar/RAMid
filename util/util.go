@@ -6,8 +6,8 @@ import (
 
 const QTD_EXECUCOES_EXPERIMENTO = 5
 const MIOP_REQUEST = 1
-const NAMING_HOST = "localhost"
-const NAMING_PORT = 1414
+const NAMING_HOST = "127.0.0.1"
+const NAMING_PORT = 1415
 
 const URL_MANAGER_COMPONENTES = "/home/robertoalencar/go/src/RAMid/plugins/manager.json"
 const URL_REPOSITORIO_COMPONENTES = "/home/robertoalencar/go/src/RAMid/plugins/"
