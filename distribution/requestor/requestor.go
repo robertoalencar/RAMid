@@ -5,13 +5,10 @@ import (
 	"RAMid/distribution/miop"
 	"RAMid/plugins"
 	"RAMid/util"
-	"fmt"
 	"plugin"
 )
 
 func Invoke(chParam chan interface{}) {
-
-	fmt.Println("Nova versao do Requestor")
 
 	param := <-chParam
 	inv := param.(aux.Invocation)

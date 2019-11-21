@@ -26,6 +26,7 @@ func SendReceive(ch chan [3]interface{}) {
 	}
 
 	conexao := serverHost + ":" + strconv.Itoa(serverPort)
+	conn = nil
 
 	for key, value := range mapaConexoes {
 		if key == conexao {
@@ -35,7 +36,13 @@ func SendReceive(ch chan [3]interface{}) {
 
 	if conn == nil {
 
-		conn, err = net.Dial("tcp", conexao)
+		for {
+			conn, err = net.Dial("tcp", conexao)
+			if err == nil {
+				break
+			}
+		}
+
 		mapaConexoes[conexao] = conn
 	}
 
@@ -60,6 +67,7 @@ func SendReceive(ch chan [3]interface{}) {
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
+
 	sizeFromServerInt := binary.LittleEndian.Uint32(sizeMsgFromServer)
 
 	// receive reply
@@ -70,6 +78,5 @@ func SendReceive(ch chan [3]interface{}) {
 	}
 
 	parametros[2] = msgFromServer
-
 	ch <- parametros
 }

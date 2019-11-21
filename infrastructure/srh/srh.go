@@ -42,6 +42,7 @@ func Receive(ch chan [3]interface{}) {
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
+
 	sizeInt := binary.LittleEndian.Uint32(size)
 
 	// receive message

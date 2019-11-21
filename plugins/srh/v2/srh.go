@@ -11,8 +11,6 @@ var ln net.Listener
 var conn net.Conn
 var err error
 
-var mapaConexoes map[string]net.Conn
-
 func Receive(ch chan [3]interface{}) {
 
 	dados := <-ch
@@ -20,33 +18,22 @@ func Receive(ch chan [3]interface{}) {
 	serverHost := dados[0].(string)
 	serverPort := dados[1].(int)
 
-	if mapaConexoes == nil {
-		mapaConexoes = make(map[string]net.Conn)
-	}
-
-	conexao := serverHost + ":" + strconv.Itoa(serverPort)
-
-	for key, value := range mapaConexoes {
-		if key == conexao {
-			conn = value
-		}
-	}
-
-	if conn == nil {
-
-		// create listener
+	// create listener
+	for {
 		ln, err = net.Listen("tcp", serverHost+":"+strconv.Itoa(serverPort))
-		if err != nil {
-			log.Fatalf("SRH:: %s", err)
+		if err == nil {
+			break
 		}
+	}
 
-		// accept connections
-		conn, err = ln.Accept()
-		if err != nil {
-			log.Fatalf("SRH:: %s", err)
-		}
+	if err != nil {
+		log.Fatalf("SRH:: %s", err)
+	}
 
-		mapaConexoes[conexao] = conn
+	// accept connections
+	conn, err = ln.Accept()
+	if err != nil {
+		log.Fatalf("SRH:: %s", err)
 	}
 
 	// receive message's size
@@ -55,6 +42,7 @@ func Receive(ch chan [3]interface{}) {
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
+
 	sizeInt := binary.LittleEndian.Uint32(size)
 
 	// receive message
@@ -87,4 +75,7 @@ func Send(ch chan []byte) {
 		log.Fatalf("CRH:: %s", err)
 	}
 
+	// close connection
+	//conn.Close()
+	//ln.Close()
 }

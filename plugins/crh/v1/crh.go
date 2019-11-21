@@ -7,23 +7,6 @@ import (
 	"strconv"
 )
 
-/*
-func Transmitir(ch chan [3]interface{}) {
-
-	dados := <-ch
-
-	serverHost := dados[0].(string)
-	serverPort := dados[1].(int)
-	msgToServer := dados[2].([]byte)
-
-	retorno := SendReceive(serverHost, serverPort, msgToServer)
-
-	dados[2] = retorno
-
-	ch <- dados
-}
-*/
-
 func SendReceive(ch chan [3]interface{}) {
 
 	parametros := <-ch
@@ -39,7 +22,6 @@ func SendReceive(ch chan [3]interface{}) {
 	for {
 		conn, err = net.Dial("tcp", serverHost+":"+strconv.Itoa(serverPort))
 		if err == nil {
-			//log.Fatalf("CRH:: %s", err)
 			break
 		}
 	}
