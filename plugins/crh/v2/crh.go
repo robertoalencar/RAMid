@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/binary"
+	"fmt"
 	"log"
 	"net"
 	"strconv"
@@ -17,7 +18,6 @@ func SendReceive(ch chan [3]interface{}) {
 	serverPort := parametros[1].(int)
 	msgToServer := parametros[2].([]byte)
 
-	// connect to server
 	var conn net.Conn
 	var err error
 
@@ -26,22 +26,26 @@ func SendReceive(ch chan [3]interface{}) {
 	}
 
 	conexao := serverHost + ":" + strconv.Itoa(serverPort)
-	conn = nil
+	conexaoExistente := false
 
 	for key, value := range mapaConexoes {
 		if key == conexao {
 			conn = value
+			conexaoExistente = true
 		}
 	}
 
-	if conn == nil {
+	if !conexaoExistente {
 
+		fmt.Println("Antes do net.Dial:", conexao)
+		// connect to server
 		for {
 			conn, err = net.Dial("tcp", conexao)
 			if err == nil {
 				break
 			}
 		}
+		fmt.Println("Depois do net.Dial:", conexao)
 
 		mapaConexoes[conexao] = conn
 	}

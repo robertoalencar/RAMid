@@ -19,8 +19,10 @@ func SendReceive(ch chan [3]interface{}) {
 	var conn net.Conn
 	var err error
 
+	conexao := serverHost + ":" + strconv.Itoa(serverPort)
+
 	for {
-		conn, err = net.Dial("tcp", serverHost+":"+strconv.Itoa(serverPort))
+		conn, err = net.Dial("tcp", conexao)
 		if err == nil {
 			break
 		}

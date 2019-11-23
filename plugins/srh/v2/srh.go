@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/binary"
+	"fmt"
 	"log"
 	"net"
 	"strconv"
@@ -11,6 +12,8 @@ var ln net.Listener
 var conn net.Conn
 var err error
 
+var mapaConexoes map[string]net.Conn
+
 func Receive(ch chan [3]interface{}) {
 
 	dados := <-ch
@@ -18,22 +21,37 @@ func Receive(ch chan [3]interface{}) {
 	serverHost := dados[0].(string)
 	serverPort := dados[1].(int)
 
-	// create listener
-	for {
-		ln, err = net.Listen("tcp", serverHost+":"+strconv.Itoa(serverPort))
-		if err == nil {
-			break
+	if mapaConexoes == nil {
+		mapaConexoes = make(map[string]net.Conn)
+	}
+
+	conexao := serverHost + ":" + strconv.Itoa(serverPort)
+
+	for key, value := range mapaConexoes {
+		if key == conexao {
+			conn = value
 		}
 	}
 
-	if err != nil {
-		log.Fatalf("SRH:: %s", err)
-	}
+	if conn == nil {
 
-	// accept connections
-	conn, err = ln.Accept()
-	if err != nil {
-		log.Fatalf("SRH:: %s", err)
+		// create listener
+		fmt.Println("Antes do net.Listen:", conexao)
+		ln, err = net.Listen("tcp", conexao)
+		fmt.Println("Depois do net.Listen:", conexao)
+		if err != nil {
+			log.Fatalf("SRH:: %s", err)
+		}
+
+		// accept connections
+		fmt.Println("Antes do ln.Accept:", conexao)
+		conn, err = ln.Accept()
+		fmt.Println("Depois do ln.Accept:", conexao)
+		if err != nil {
+			log.Fatalf("SRH:: %s", err)
+		}
+
+		mapaConexoes[conexao] = conn
 	}
 
 	// receive message's size
@@ -74,8 +92,4 @@ func Send(ch chan []byte) {
 	if err != nil {
 		log.Fatalf("CRH:: %s", err)
 	}
-
-	// close connection
-	//conn.Close()
-	//ln.Close()
 }

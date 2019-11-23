@@ -18,9 +18,11 @@ func Receive(ch chan [3]interface{}) {
 	serverHost := dados[0].(string)
 	serverPort := dados[1].(int)
 
+	conexao := serverHost + ":" + strconv.Itoa(serverPort)
+
 	// create listener
 	for {
-		ln, err = net.Listen("tcp", serverHost+":"+strconv.Itoa(serverPort))
+		ln, err = net.Listen("tcp", conexao)
 		if err == nil {
 			break
 		}
