@@ -6,6 +6,7 @@ import (
 	"RAMid/plugins"
 	"RAMid/services/naming"
 	"RAMid/util"
+	"fmt"
 	"plugin"
 )
 
@@ -19,31 +20,32 @@ func (NamingInvoker) Invoke() {
 	util.ChecaErro(err, "Falha ao carregar o arquivo do componente")
 
 	funcReceive, err := srhInst.Lookup("Receive")
-	util.ChecaErro(err, "Falha ao carregar a função do componente")
-
 	Receive := funcReceive.(func(chan [3]interface{}))
 
 	funcSend, err := srhInst.Lookup("Send")
-	util.ChecaErro(err, "Falha ao carregar a função do componente")
+	Send := funcSend.(func(chan [2]interface{}))
 
-	Send := funcSend.(func(chan []byte))
+	marshallerInst, err := plugin.Open(manager.ObterComponente(util.ID_COMPONENTE_MARSHALLER))
+
+	funcUnmarshall, err := marshallerInst.Lookup("Unmarshall")
+	Unmarshall := funcUnmarshall.(func(chan interface{}))
+
+	funcMarshall, err := marshallerInst.Lookup("Marshall")
+	Marshall := funcMarshall.(func(chan interface{}))
+
+	chReceiveSrh := make(chan [3]interface{})
+	chUnmarshall := make(chan interface{})
+	chMarshaller := make(chan interface{})
+	chSendSrh := make(chan [2]interface{})
 
 	namingImpl := naming.NamingService{}
 	miopPacketReply := miop.Packet{}
 	replyParams := make([]interface{}, 1)
 
-	marshallerInst, err := plugin.Open(manager.ObterComponente(util.ID_COMPONENTE_MARSHALLER))
-	util.ChecaErro(err, "Falha ao carregar o arquivo do componente")
-
-	funcUnmarshall, err := marshallerInst.Lookup("Unmarshall")
-	util.ChecaErro(err, "Falha ao carregar a função do componente")
-
-	Unmarshall := funcUnmarshall.(func(chan interface{}))
-
 	// control loop
 	for {
 		// receive request packet
-		chReceiveSrh := make(chan [3]interface{})
+
 		go Receive(chReceiveSrh)
 
 		var parametros [3]interface{}
@@ -57,7 +59,6 @@ func (NamingInvoker) Invoke() {
 		rcvMsgBytes := retornoReceive[2].([]byte)
 
 		// unmarshall request packet
-		chUnmarshall := make(chan interface{})
 		go Unmarshall(chUnmarshall)
 
 		chUnmarshall <- rcvMsgBytes
@@ -92,12 +93,6 @@ func (NamingInvoker) Invoke() {
 		miopPacketReply = miop.Packet{Hdr: header, Bd: body}
 
 		// marshall reply packet
-		funcMarshall, err := marshallerInst.Lookup("Marshall")
-		util.ChecaErro(err, "Falha ao carregar a função do componente")
-
-		Marshall := funcMarshall.(func(chan interface{}))
-
-		chMarshaller := make(chan interface{})
 		go Marshall(chMarshaller)
 
 		// serialise request packet
@@ -106,8 +101,21 @@ func (NamingInvoker) Invoke() {
 		msgToClientBytes := retornoMarshall.([]byte)
 
 		// send reply packet
-		chSendSrh := make(chan []byte)
+		// send reply
 		go Send(chSendSrh)
-		chSendSrh <- msgToClientBytes
+
+		var parametrosSend [2]interface{}
+		parametrosSend[0] = msgToClientBytes
+
+		// send request packet and receive reply packet
+		chSendSrh <- parametrosSend
+
+		retornoSend := <-chSendSrh
+
+		mensagemEnviada := retornoSend[1].(bool)
+
+		if mensagemEnviada {
+			fmt.Println("Mensagem enviada")
+		}
 	}
 }

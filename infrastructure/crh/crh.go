@@ -19,8 +19,10 @@ func SendReceive(ch chan [3]interface{}) {
 	var conn net.Conn
 	var err error
 
+	conexao := serverHost + ":" + strconv.Itoa(serverPort)
+
 	for {
-		conn, err = net.Dial("tcp", serverHost+":"+strconv.Itoa(serverPort))
+		conn, err = net.Dial("tcp", conexao)
 		if err == nil {
 			break
 		}
@@ -34,20 +36,20 @@ func SendReceive(ch chan [3]interface{}) {
 	binary.LittleEndian.PutUint32(sizeMsgToServer, l)
 	conn.Write(sizeMsgToServer)
 	if err != nil {
-		log.Fatalf("CRH:: %s", err)
+		log.Fatalf("CRH 1 :: %s", err)
 	}
 
 	// send message
 	_, err = conn.Write(msgToServer)
 	if err != nil {
-		log.Fatalf("CRH:: %s", err)
+		log.Fatalf("CRH 2 :: %s", err)
 	}
 
 	// receive message's size
 	sizeMsgFromServer := make([]byte, 4)
 	_, err = conn.Read(sizeMsgFromServer)
 	if err != nil {
-		log.Fatalf("SRH:: %s", err)
+		log.Fatalf("CRH 3 :: %s", err)
 	}
 	sizeFromServerInt := binary.LittleEndian.Uint32(sizeMsgFromServer)
 
@@ -55,7 +57,7 @@ func SendReceive(ch chan [3]interface{}) {
 	msgFromServer := make([]byte, sizeFromServerInt)
 	_, err = conn.Read(msgFromServer)
 	if err != nil {
-		log.Fatalf("SRH:: %s", err)
+		log.Fatalf("CRH 4 :: %s", err)
 	}
 
 	parametros[2] = msgFromServer

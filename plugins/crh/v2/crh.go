@@ -26,6 +26,7 @@ func SendReceive(ch chan [3]interface{}) {
 	}
 
 	conexao := serverHost + ":" + strconv.Itoa(serverPort)
+	fmt.Println("Conexão:", conexao)
 	conexaoExistente := false
 
 	for key, value := range mapaConexoes {
@@ -37,7 +38,6 @@ func SendReceive(ch chan [3]interface{}) {
 
 	if !conexaoExistente {
 
-		fmt.Println("Antes do net.Dial:", conexao)
 		// connect to server
 		for {
 			conn, err = net.Dial("tcp", conexao)
@@ -45,10 +45,11 @@ func SendReceive(ch chan [3]interface{}) {
 				break
 			}
 		}
-		fmt.Println("Depois do net.Dial:", conexao)
 
 		mapaConexoes[conexao] = conn
 	}
+
+	//fmt.Println("antes do writer 1")
 
 	// send message's size
 	sizeMsgToServer := make([]byte, 4)
@@ -59,11 +60,19 @@ func SendReceive(ch chan [3]interface{}) {
 		log.Fatalf("CRH:: %s", err)
 	}
 
+	//fmt.Println("depois do writer 1")
+
+	//fmt.Println("antes do writer 2")
+
 	// send message
 	_, err = conn.Write(msgToServer)
 	if err != nil {
 		log.Fatalf("CRH:: %s", err)
 	}
+
+	//fmt.Println("depois do writer 2")
+
+	//fmt.Println("antes do read 1")
 
 	// receive message's size
 	sizeMsgFromServer := make([]byte, 4)
@@ -72,7 +81,11 @@ func SendReceive(ch chan [3]interface{}) {
 		log.Fatalf("SRH:: %s", err)
 	}
 
+	//fmt.Println("depois do read 1")
+
 	sizeFromServerInt := binary.LittleEndian.Uint32(sizeMsgFromServer)
+
+	//fmt.Println("antes do read 2")
 
 	// receive reply
 	msgFromServer := make([]byte, sizeFromServerInt)
@@ -80,6 +93,8 @@ func SendReceive(ch chan [3]interface{}) {
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
+
+	//fmt.Println("depois do read 2")
 
 	parametros[2] = msgFromServer
 	ch <- parametros
