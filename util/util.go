@@ -4,7 +4,6 @@ import (
 	"log"
 )
 
-const QTD_EXECUCOES_EXPERIMENTO = 5
 const MIOP_REQUEST = 1
 const NAMING_HOST = "127.0.0.1"
 const NAMING_PORT = 1415
