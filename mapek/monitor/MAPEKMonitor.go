@@ -3,6 +3,7 @@ package monitor
 import (
 	"RAMid/mapek/analyser"
 	"RAMid/util"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -33,6 +34,11 @@ func (MAPEKMonitor) Monitor(ehPrimeiraExecucao bool) {
 		}
 
 		if qtdComponentesAntesAdaptacao != qtdAtualComponentes {
+
+			//A linha abaixo é para medir o tempo de adaptação
+			fmt.Println("Início adaptação:", time.Now())
+
+			//Invoca o Analyser
 			mapekAnalyse := analyser.MAPEKAnalyser{}
 			go mapekAnalyse.Analyse()
 			qtdComponentesAntesAdaptacao = qtdAtualComponentes

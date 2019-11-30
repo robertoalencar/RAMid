@@ -4,6 +4,7 @@ import (
 	"RAMid/distribution/miop"
 	"encoding/json"
 	"log"
+	"time"
 )
 
 func Marshall(ch chan interface{}) {
@@ -17,6 +18,8 @@ func Marshall(ch chan interface{}) {
 	if err != nil {
 		log.Fatalf("Marshaller:: Marshall:: %s", err)
 	}
+
+	time.Sleep(500 * time.Microsecond)
 
 	ch <- r
 }

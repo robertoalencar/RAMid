@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"time"
 )
 
 type MAPEKExecutor struct {
@@ -41,6 +42,9 @@ func (executor MAPEKExecutor) Execute() {
 	util.ChecaErro(err, "Falha ao converter o mapa no novo JSON")
 
 	ioutil.WriteFile(util.URL_MANAGER_COMPONENTES, arquivoAtualizado, 0644)
+
+	//A linha abaixo é para medir o tempo de adaptação
+	fmt.Println("Fim adaptação:", time.Now())
 
 	fmt.Println("Adaptação realizada com sucesso, componente", executor.IdPlugin, "atualizado para a versão", executor.NovaVersao)
 }
